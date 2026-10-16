@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/static/index.html" },
+    { "source": "/css/:match*", "destination": "/static/css/:match*" },
+    { "source": "/js/:match*", "destination": "/static/js/:match*" },
+    { "source": "/data/:match*", "destination": "/static/data/:match*" },
+    { "source": "/:match*", "destination": "/static/:match*" }
+  ]
+}

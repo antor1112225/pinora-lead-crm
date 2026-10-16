@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PINORA - Local Lead Workspace &amp; Simple CRM | Zero Paid API Cost</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <h1>PINORA <span class="badge-zero">CRM &bull; ZERO COST</span></h1>
+        <p>Lead Intelligence &bull; Ads Verification &bull; Follow-up CRM</p>
+      </div>
+    </div>
+
+    <div class="header-status-group">
+      <div class="cost-indicator" title="Local-first software architecture. Zero paid APIs, zero subscriptions.">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        <span>Paid API: <strong>$0.00</strong></span>
+      </div>
+
+      <div class="status-pill idle" id="headerStatusPill">
+        <div class="status-dot"></div>
+        <span id="headerStatusText">IDLE</span>
+      </div>
+
+      <button class="header-btn" onclick="openBackupModal()" title="Local Database Backups &amp; Integrity">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Backups
+      </button>
+
+      <button class="header-btn btn-quit" onclick="shutdownServer()" title="Clean Exit and Stop Server">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+          <line x1="12" y1="2" x2="12" y2="12"/>
+        </svg>
+        Quit
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="dashboard-container">
+
+    <!-- Top CRM Metrics Strip (Section 18) -->
+    <section class="crm-metrics-strip">
+      <div class="crm-stat-card">
+        <span class="crm-stat-label">TOTAL LEADS</span>
+        <div class="crm-stat-val" id="crmTotalLeads">0</div>
+      </div>
+      <div class="crm-stat-card">
+        <span class="crm-stat-label">GOOGLE ADS YES</span>
+        <div class="crm-stat-val" id="crmGoogleAdsYes" style="color:var(--accent-emerald);">0</div>
+      </div>
+      <div class="crm-stat-card">
+        <span class="crm-stat-label">META ADS YES</span>
+        <div class="crm-stat-val" id="crmMetaAdsYes" style="color:var(--accent-cyan);">0</div>
+      </div>
+      <div class="crm-stat-card">
+        <span class="crm-stat-label">GOOGLE + META</span>
+        <div class="crm-stat-val" id="crmGooglePlusMeta" style="color:#A78BFA;">0</div>
+      </div>
+      <div class="crm-stat-card">
+        <span class="crm-stat-label">CONTACTED</span>
+        <div class="crm-stat-val" id="crmContacted" style="color:#38BDF8;">0</div>
+      </div>
+      <div class="crm-stat-card alert-due">
+        <span class="crm-stat-label">FOLLOW-UPS DUE</span>
+        <div class="crm-stat-val" id="crmFollowupsDue" style="color:#F59E0B;">0</div>
+      </div>
+      <div class="crm-stat-card">
+        <span class="crm-stat-label">REPLIES RECEIVED</span>
+        <div class="crm-stat-val" id="crmRepliesReceived" style="color:#10B981;">0</div>
+      </div>
+    </section>
+
+    <!-- Top Action Toolbar (Section 18 Buttons) -->
+    <section class="crm-actions-strip">
+      <button class="btn-top-action btn-accent-emerald" onclick="openAddLeadModal()" title="Add a new business lead manually">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        + ADD LEAD
+      </button>
+
+      <button class="btn-top-action btn-accent-cyan" onclick="openNewNoteModal()" title="Jot a daily note or parse outreach for CRM">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+        + NEW NOTE
+      </button>
+
+      <button class="btn-top-action" onclick="quickOpenAdsChecker('Google')" title="Open Google Ads Transparency Center inspection">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        CHECK GOOGLE ADS
+      </button>
+
+      <button class="btn-top-action" onclick="quickOpenAdsChecker('Meta')" title="Open Meta Ad Library inspection">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+        CHECK META ADS
+      </button>
+
+      <button class="btn-top-action" onclick="switchTab('followups')" title="View today's follow-up reminders and scheduled tasks">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        VIEW FOLLOW-UPS
+      </button>
+
+      <button class="btn-top-action" onclick="triggerQuickBackup()" title="Create instant SQLite point-in-time backup">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        BACKUP NOW
+      </button>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="main-nav-tabs">
+      <button class="tab-btn active" id="tabBtnLeads" onclick="switchTab('leads')">
+        <span>📋 All Leads</span>
+        <span class="tab-badge" id="tabBadgeAllLeads">0</span>
+      </button>
+      <button class="tab-btn" id="tabBtnNotes" onclick="switchTab('notes')">
+        <span>📝 My Daily Notes</span>
+        <span class="tab-badge" id="tabBadgeNotes" style="background:rgba(56,189,248,0.2); color:#38BDF8;">0</span>
+      </button>
+      <button class="tab-btn" id="tabBtnFollowups" onclick="switchTab('followups')">
+        <span>⏰ Follow-ups Today</span>
+        <span class="tab-badge" id="tabBadgeFollowups" style="background:rgba(245,158,11,0.2); color:#FBBF24;">0</span>
+      </button>
+      <button class="tab-btn" id="tabBtnAds" onclick="switchTab('ads')">
+        <span>🎯 Ads Verification</span>
+      </button>
+      <button class="tab-btn" id="tabBtnFinder" onclick="switchTab('finder')">
+        <span>🔍 Lead Finder</span>
+      </button>
+      <button class="tab-btn" id="tabBtnSettings" onclick="switchTab('settings')">
+        <span>⚙️ Settings &amp; Backup</span>
+      </button>
+    </nav>
+
+    <!-- ========================================================== -->
+    <!-- TAB 1: ALL LEADS TABLE (MATCHING REFERENCE SCREENSHOT)     -->
+    <!-- ========================================================== -->
+    <section class="leads-section" id="sectionLeads">
+
+      <!-- Header & Action Toolbar -->
+      <div class="leads-header-row">
+        <div class="leads-count-title">
+          <h2 style="font-size:15px; color:var(--text-primary);" id="leadsLoadedTitle">12 leads loaded</h2>
+        </div>
+
+        <div class="leads-actions-bar">
+          <button class="btn-tool btn-accent" onclick="downloadExport('csv')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download CSV
+          </button>
+
+          <button class="btn-tool" onclick="downloadExport('xlsx')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Excel (XLSX)
+          </button>
+
+          <button class="btn-tool" onclick="openImportModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Import CSV
+          </button>
+
+          <button class="btn-tool" id="btnOpenDuplicates" onclick="openDuplicateModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Duplicates (<span id="dupeCountBadge">0</span>)
+          </button>
+
+          <button class="btn-tool btn-danger" onclick="deleteSelectedLeads()" id="btnDeleteSelected" style="display:none;">
+            Delete Selected (<span id="selectedCountBadge">0</span>)
+          </button>
+
+          <button class="btn-tool btn-danger" onclick="confirmClearAll()">
+            Clear All
+          </button>
+        </div>
+      </div>
+
+      <!-- REFINE Filters Bar -->
+      <div class="refine-card">
+        <div class="refine-top-row">
+          <span class="refine-title">REFINE LEADS</span>
+          <button class="btn-reset-filters" onclick="resetAllFilters()">Reset Filters</button>
+        </div>
+
+        <div class="refine-inputs-grid">
+          <div class="refine-input-group">
+            <label>Search Name / Phone / Email</label>
+            <input type="text" id="filterSearch" class="input-control" placeholder="Search..." oninput="debounceLoadLeads()">
+          </div>
+          <div class="refine-input-group">
+            <label>City / Area</label>
+            <input type="text" id="filterCity" class="input-control" placeholder="Orlando, FL" oninput="debounceLoadLeads()">
+          </div>
+          <div class="refine-input-group">
+            <label>Category / Service</label>
+            <input type="text" id="filterCategory" class="input-control" placeholder="Phone repair..." oninput="debounceLoadLeads()">
+          </div>
+          <div class="refine-input-group">
+            <label>CRM Status</label>
+            <select id="filterCrmStatus" class="input-control" onchange="debounceLoadLeads()">
+              <option value="">All CRM Statuses</option>
+              <option value="NEW">NEW</option>
+              <option value="READY TO CONTACT">READY TO CONTACT</option>
+              <option value="CONTACTED">CONTACTED</option>
+              <option value="REPLIED">REPLIED</option>
+              <option value="INTERESTED">INTERESTED</option>
+              <option value="FOLLOW-UP DUE">FOLLOW-UP DUE</option>
+              <option value="QUALIFIED">QUALIFIED</option>
+              <option value="CLIENT">CLIENT</option>
+              <option value="NOT INTERESTED">NOT INTERESTED</option>
+              <option value="DO NOT CONTACT">DO NOT CONTACT</option>
+            </select>
+          </div>
+          <div class="refine-input-group">
+            <label>Advertiser Filter</label>
+            <select id="filterAdsStatus" class="input-control" onchange="debounceLoadLeads()">
+              <option value="">ALL LEADS</option>
+              <option value="GOOGLE ADS YES">GOOGLE ADS YES</option>
+              <option value="META ADS YES">META ADS YES</option>
+              <option value="GOOGLE + META">GOOGLE + META</option>
+              <option value="GOOGLE ONLY">GOOGLE ONLY</option>
+              <option value="META ONLY">META ONLY</option>
+              <option value="PAUSED ADS">PAUSED ADS</option>
+              <option value="NO PUBLIC ADS FOUND">NO PUBLIC ADS FOUND</option>
+              <option value="NEEDS REVIEW">NEEDS REVIEW</option>
+              <option value="NOT CHECKED">NOT CHECKED</option>
+            </select>
+          </div>
+          <div class="refine-input-group">
+            <label>WhatsApp Status</label>
+            <select id="filterWhatsAppStatus" class="input-control" onchange="debounceLoadLeads()">
+              <option value="">All WhatsApp Statuses</option>
+              <option value="Available / Chat Opens">Available / Chat Opens</option>
+              <option value="Not Available">Not Available</option>
+              <option value="Not Checked">Not Checked</option>
+              <option value="Uncertain">Uncertain</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="refine-toggles-row">
+          <label class="filter-toggle-pill pill-verified-only" id="pillVerifiedOnly" title="Filter to show only leads with verified active Google or Meta ads">
+            <input type="checkbox" id="chkVerifiedAdvertisersOnly" onchange="debounceLoadLeads()">
+            ⚡ SHOW ONLY VERIFIED ACTIVE ADVERTISERS
+          </label>
+          <label class="filter-toggle-pill" id="pillHasPhone">
+            <input type="checkbox" id="chkHasPhone" onchange="debounceLoadLeads()">
+            Has phone
+          </label>
+          <label class="filter-toggle-pill" id="pillHasWebsite">
+            <input type="checkbox" id="chkHasWebsite" onchange="debounceLoadLeads()">
+            Has website
+          </label>
+          <label class="filter-toggle-pill" id="pillHasEmail">
+            <input type="checkbox" id="chkHasEmail" onchange="debounceLoadLeads()">
+            Has email
+          </label>
+          <label class="filter-toggle-pill" id="pillHasSocial">
+            <input type="checkbox" id="chkHasSocial" onchange="debounceLoadLeads()">
+            Has social
+          </label>
+          <label class="filter-toggle-pill" id="pillNoWebsite">
+            <input type="checkbox" id="chkNoWebsite" onchange="debounceLoadLeads()">
+            No website
+          </label>
+
+          <div class="filter-active-summary" id="filterSummaryText">No filters active</div>
+        </div>
+      </div>
+
+      <!-- Compact Lead Table Matching Screenshot -->
+      <div class="table-wrapper">
+        <table class="leads-table" id="leadsTable">
+          <thead>
+            <tr>
+              <th width="30"><input type="checkbox" id="chkSelectAll" onchange="toggleSelectAll(this)"></th>
+              <th width="40" title="WhatsApp Click-to-Chat">WA</th>
+              <th>BUSINESS</th>
+              <th>WEBSITE</th>
+              <th>GOOGLE ADS</th>
+              <th>META ADS</th>
+              <th>PHONE</th>
+              <th>EMAIL</th>
+              <th>SOCIAL</th>
+              <th>STATUS</th>
+              <th>NEXT FOLLOW-UP</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody">
+            <!-- Dynamic rows injected here -->
+          </tbody>
+        </table>
+
+        <!-- Empty State Message -->
+        <div class="empty-leads-box" id="emptyLeadsState">
+          <div class="empty-icon-circle">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <h3>No leads yet</h3>
+          <p>Add a lead with the green button, import a CSV, or run the Lead Finder agent.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- TAB: MY DAILY NOTES WORKSPACE                              -->
+    <!-- ========================================================== -->
+    <section class="leads-section" id="sectionNotes" style="display:none;">
+      <div class="card-panel">
+        <div class="card-header-bar">
+          <div class="card-title-badge">
+            <span class="num-badge">NOTES</span>
+            <h2>MY DAILY NOTES &amp; TEXT-TO-CRM INTERPRETER</h2>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-tool btn-accent" onclick="openNewNoteModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              + New Note
+            </button>
+          </div>
+        </div>
+
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+          Record raw outreach notes in English or Banglish (e.g. <em>"Leads #1-15 WhatsApp e send korechi, follow up in 3 days"</em>). 
+          Our 100% deterministic local parser recognizes lead IDs, outreach channels, and schedules, presents a safe preview, and updates SQLite CRM records with one click.
+        </p>
+
+        <!-- Subnav date filters & search -->
+        <div class="notes-subnav-bar">
+          <div class="notes-tabs-group">
+            <button class="note-filter-btn active" id="noteTabToday" onclick="filterNotesByRange('TODAY')">TODAY</button>
+            <button class="note-filter-btn" id="noteTabYesterday" onclick="filterNotesByRange('YESTERDAY')">YESTERDAY</button>
+            <button class="note-filter-btn" id="noteTabWeek" onclick="filterNotesByRange('THIS WEEK')">THIS WEEK</button>
+            <button class="note-filter-btn" id="noteTabOlder" onclick="filterNotesByRange('OLDER NOTES')">OLDER NOTES</button>
+            <button class="note-filter-btn" id="noteTabAll" onclick="filterNotesByRange('ALL')">ALL (<span id="allNotesCountBadge">0</span>)</button>
+          </div>
+
+          <div class="notes-search-box">
+            <input type="text" id="notesSearchInput" class="input-control" placeholder="Search notes..." oninput="debounceFilterNotes()">
+          </div>
+        </div>
+
+        <!-- Notes Cards Grid -->
+        <div class="notes-grid" id="notesGridContainer">
+          <!-- Dynamically populated note cards -->
+        </div>
+
+        <!-- Empty Notes State -->
+        <div id="emptyNotesState" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">
+          <div style="font-size:36px; margin-bottom:8px;">📝</div>
+          <h4>No Notes in this View</h4>
+          <p style="font-size:12px; margin-top:4px;">Click "+ New Note" above to write your outreach updates.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- TAB 2: FOLLOW-UPS TODAY (TODAY'S ACTIONS DASHBOARD)        -->
+    <!-- ========================================================== -->
+    <section class="leads-section" id="sectionFollowups" style="display:none;">
+      <div class="card-panel">
+        <div class="card-header-bar">
+          <div class="card-title-badge">
+            <span class="num-badge" style="background:rgba(245,158,11,0.2); color:#FBBF24;">TODAY</span>
+            <h2>TODAY'S FOLLOW-UP ACTIONS</h2>
+          </div>
+          <span style="font-size:12px; color:var(--text-secondary);" id="todayDateSubtitle"></span>
+        </div>
+
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+          These are your scheduled reminders calculated from your contact history. 
+          Prospects that replied, declined, or became clients are automatically filtered out.
+        </p>
+
+        <!-- Overdue Section -->
+        <div id="overdueSection">
+          <h3 style="font-size:13px; color:#F87171; text-transform:uppercase; letter-spacing:0.8px; margin:14px 0 8px 0; display:flex; align-items:center; gap:6px;">
+            ⚠️ Overdue Reminders (<span id="overdueCountBadge">0</span>)
+          </h3>
+          <div class="actions-due-grid" id="overdueCardsGrid"></div>
+        </div>
+
+        <!-- Due Today Section -->
+        <div id="dueTodaySection">
+          <h3 style="font-size:13px; color:var(--accent-emerald); text-transform:uppercase; letter-spacing:0.8px; margin:18px 0 8px 0; display:flex; align-items:center; gap:6px;">
+            ⏰ Due Today (<span id="dueTodayCountBadge">0</span>)
+          </h3>
+          <div class="actions-due-grid" id="dueTodayCardsGrid"></div>
+        </div>
+
+        <!-- Due Tomorrow Section -->
+        <div id="dueTomorrowSection">
+          <h3 style="font-size:13px; color:var(--accent-cyan); text-transform:uppercase; letter-spacing:0.8px; margin:18px 0 8px 0; display:flex; align-items:center; gap:6px;">
+            📅 Due Tomorrow (<span id="dueTomorrowCountBadge">0</span>)
+          </h3>
+          <div class="actions-due-grid" id="dueTomorrowCardsGrid"></div>
+        </div>
+
+        <!-- Empty Follow-ups State -->
+        <div id="emptyFollowupsState" style="display:none; text-align:center; padding:40px; color:var(--accent-emerald);">
+          <div style="font-size:36px; margin-bottom:8px;">✓</div>
+          <h4>All Caught Up!</h4>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">No overdue or pending follow-ups for today.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- TAB 3: ADS VERIFICATION WORKSPACE                          -->
+    <!-- ========================================================== -->
+    <section class="leads-section" id="sectionAds" style="display:none;">
+      <div class="card-panel">
+        <div class="card-header-bar">
+          <div class="card-title-badge">
+            <span class="num-badge">ADS</span>
+            <h2>ADVERTISING VERIFICATION WORKSPACE</h2>
+          </div>
+          <span class="field-hint-badge">Official Transparency Center &amp; Meta Ad Library</span>
+        </div>
+
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+          Inspect public advertising evidence directly on official platforms. Click "Check Google" or "Check Meta" to open the official transparency search in your browser, then record the result.
+        </p>
+
+        <div class="table-wrapper">
+          <table class="leads-table">
+            <thead>
+              <tr>
+                <th>BUSINESS</th>
+                <th>WEBSITE</th>
+                <th>GOOGLE ADS STATUS</th>
+                <th>META ADS STATUS</th>
+                <th>ADS SUMMARY</th>
+                <th>EVIDENCE &amp; ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="adsVerificationTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- TAB 4: LEAD FINDER (MISSION & TELEMETRY AGENT)             -->
+    <!-- ========================================================== -->
+    <section class="top-deck-grid" id="sectionFinder" style="display:none;">
+
+      <!-- LEFT: 01 MISSION -->
+      <div class="card-panel">
+        <div class="card-header-bar">
+          <div class="card-title-badge">
+            <span class="num-badge">01</span>
+            <h2>MISSION</h2>
+          </div>
+          <span class="field-hint-badge" id="searchesReadyBadge">0 searches ready</span>
+        </div>
+
+        <form class="mission-form" id="missionForm" onsubmit="event.preventDefault(); deployAgent();">
+          <div class="field-group">
+            <label class="field-label">Business Type &mdash; One Per Line</label>
+            <textarea 
+              id="inputKeywords" 
+              class="input-control" 
+              placeholder="roofing contractor&#10;plumbing company&#10;phone repair" 
+              rows="3" 
+              oninput="updateQueryPreview()"
+            >mobile phone repair
+roofing contractor</textarea>
+          </div>
+
+          <div class="field-grid-2">
+            <div class="field-group">
+              <label class="field-label">City / Area</label>
+              <input type="text" id="inputCity" class="input-control" placeholder="Orlando FL" value="Orlando FL" oninput="updateQueryPreview()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Zip / Postal (Optional)</label>
+              <input type="text" id="inputZip" class="input-control" placeholder="e.g. 32819 (Optional)" value="" oninput="updateQueryPreview()">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Search Query Preview</label>
+            <div class="search-preview-box" id="searchPreviewBox">
+              Maps &amp; Open Data will search: <span>"mobile phone repair in Orlando FL"</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label-row">
+              <label class="field-label">Max Results Per Search</label>
+              <span class="field-hint-badge">0 = No Cap (All Leads)</span>
+            </div>
+            <input type="number" id="inputMaxResults" class="input-control" value="0" min="0" placeholder="0 = No limit (fetch all available leads)" oninput="updateQueryPreview()">
+            <span style="font-size:11px; color:var(--text-muted); margin-top:3px;">
+              ⚡ <strong>0 = No cap:</strong> Extracts <strong>every single lead</strong> available in this area for each niche.
+            </span>
+          </div>
+
+          <!-- Options -->
+          <div class="checkbox-group">
+            <label class="checkbox-tile">
+              <input type="checkbox" id="chkHuntEmails" checked>
+              <div class="checkbox-content">
+                <span class="checkbox-title">Hunt for emails</span>
+                <span class="checkbox-desc">Visits official websites for public mailto links, contact forms &amp; socials.</span>
+              </div>
+            </label>
+
+            <label class="checkbox-tile">
+              <input type="checkbox" id="chkAutoDedup" checked>
+              <div class="checkbox-content">
+                <span class="checkbox-title">Automatic deduplication</span>
+                <span class="checkbox-desc">Normalizes domains, phones, and addresses across queries.</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="mission-action-bar">
+            <button type="submit" id="btnDeploy" class="btn-primary-deploy">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Deploy agent ⚡
+            </button>
+            <button type="button" id="btnPause" class="btn-pause" onclick="togglePauseMission()">
+              ⏸ Pause
+            </button>
+            <button type="button" id="btnStop" class="btn-stop" onclick="stopMission()">
+              Stop
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- RIGHT: 02 TELEMETRY -->
+      <div class="card-panel telemetry-panel">
+        <div class="card-header-bar">
+          <div class="card-title-badge">
+            <span class="num-badge">02</span>
+            <h2>TELEMETRY</h2>
+          </div>
+          <div class="status-pill idle" id="telemetryStatusBadge">
+            <div class="status-dot"></div>
+            <span id="telemetryStatusText">WAITING</span>
+          </div>
+        </div>
+
+        <div class="telemetry-metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Leads Found</span>
+            <div class="metric-value" id="statLeadsFound">0</div>
+            <span class="metric-sub" id="statLeadsFoundSub">not started</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Shown</span>
+            <div class="metric-value" id="statShown">0</div>
+            <span class="metric-sub">after filters</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Processed</span>
+            <div class="metric-value" id="statProcessed">0</div>
+            <span class="metric-sub">places reviewed</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Queued</span>
+            <div class="metric-value" id="statQueued">0</div>
+            <span class="metric-sub">searches pending</span>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-header">
+            <span>Sweep Progress</span>
+            <span id="progressPercentLabel">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="terminal-window" id="terminalWindow">
+          <div class="terminal-line INFO">
+            <span class="t-prompt">&gt;</span>
+            <span class="t-msg">Ready &mdash; describe a mission on the left and deploy the agent</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FULL-WIDTH: 03 GOOGLE MAPS LEADS EXTRACTOR (100% FREE & ZERO API COST) -->
+      <div class="card-panel" style="grid-column: 1 / -1; margin-top: 15px; background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(56,189,248,0.08) 100%); border: 1px solid rgba(56,189,248,0.3);">
+        <div class="card-header-bar" style="margin-bottom: 10px;">
+          <div class="card-title-badge">
+            <span class="num-badge" style="background:var(--accent-emerald); color:#000;">G-MAPS</span>
+            <h2 style="color:var(--text-primary);">GOOGLE MAPS INSTANT EXTRACTOR &bull; ZERO PAID APIS</h2>
+          </div>
+          <span class="field-hint-badge" style="background:rgba(16,185,129,0.2); color:var(--accent-emerald);">Extract 50-100+ Leads in 2 Seconds</span>
+        </div>
+        
+        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+          OpenStreetMap has public open data, but Google Maps has <strong>every local business in Dublin / your city</strong>. 
+          Use this built-in 1-Click Extractor to grab all businesses directly from Google Maps into your Pinora CRM table with $0 cost!
+        </p>
+
+        <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+          <!-- 1. Open Maps Button -->
+          <button type="button" class="btn btn-secondary" onclick="openCurrentSearchInGoogleMaps()" style="background:#1E3A5F; border-color:var(--accent-cyan); color:#FFF; font-weight:700;">
+            🗺️ 1. Open Search in Google Maps ↗
+          </button>
+
+          <!-- 2. Draggable Bookmarklet Button -->
+          <a class="btn btn-primary" id="btnGmapsBookmarklet" href="javascript:(function(){const items=Array.from(document.querySelectorAll('div[role=%22feed%22]>div>div[jsaction],div.m6QErb div.Nv2PK'));const leads=[];let skippedNoWeb=0;items.forEach(el=>{const titleEl=el.querySelector('div.fontHeadlineSmall,div.qBF1Pd,a[href*=%22/maps/place/%22]');const name=titleEl?titleEl.textContent.trim():'';if(!name)return;const webBtn=el.querySelector('a[data-value=%22Website%22],a[aria-label*=%22website%22i]');const website=webBtn?webBtn.href:'';if(!website){skippedNoWeb++;return;}const linkEl=el.querySelector('a[href*=%22/maps/place/%22]');const url=linkEl?linkEl.href:'';const ratingEl=el.querySelector('span[role=%22img%22],span.MW4etd');const rating=ratingEl?parseFloat(ratingEl.textContent.trim())||null:null;const revEl=el.querySelector('span.UY7F9');let reviews=null;if(revEl){const rm=revEl.textContent.replace(/[(),]/g,'').trim();reviews=parseInt(rm,10)||null;}const lines=Array.from(el.querySelectorAll('div.W4Efsd')).map(d=>d.textContent.trim());let phone='NOT AVAILABLE';let category='Local Business';let address='NOT AVAILABLE';lines.forEach(text=>{const phMatch=text.match(/(\+?\d[\d\s\-\(\)]{7,}\d)/);if(phMatch&&phone==='NOT AVAILABLE')phone=phMatch[1].trim();if(text.includes('·')){const parts=text.split('·');if(parts[0])category=parts[0].trim();if(parts[1]&&address==='NOT AVAILABLE')address=parts[1].trim();}});leads.push({business_name:name,category:category,rating:rating,reviews_count:reviews,website:website,phone:phone,address:address,url:url});});if(leads.length===0){alert('No Google Maps business cards WITH WEBSITES detected on this page (Skipped '+skippedNoWeb+' without websites). Please scroll down to load more results!');return;}fetch('http://127.0.0.1:3847/api/leads/bulk-capture',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_name:'Google Maps Instant Extractor',leads:leads})}).then(r=>r.json()).then(res=>{alert(`✅ Success! Imported ${res.inserted_count||leads.length} leads WITH WEBSITES directly into Pinora CRM!\nSkipped (No Website): ${skippedNoWeb}\nDuplicates filtered: ${res.duplicates_count||0}`);}).catch(err=>{alert('Error connecting to Pinora local server: '+err);});})();" title="Drag this button to your browser Bookmarks Bar" style="cursor:grab; background:var(--accent-emerald); color:#000; font-weight:800; border:none; box-shadow:0 0 12px var(--accent-emerald-glow);">
+            ⭐ 2. Drag to Bookmarks: ⚡ Extract to Pinora (Website Required)
+          </a>
+
+          <!-- 3. Instructions Pill -->
+          <button type="button" class="btn btn-secondary" onclick="openGmapsExtractorGuide()" style="border-color:rgba(255,255,255,0.15);">
+            ❓ How to use (3 Easy Steps)
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- TAB 5: SETTINGS & BACKUP                                   -->
+    <!-- ========================================================== -->
+    <section class="leads-section" id="sectionSettings" style="display:none;">
+      <div class="card-panel">
+        <div class="card-header-bar">
+          <div class="card-title-badge">
+            <span class="num-badge">SETTINGS</span>
+            <h2>CRM FOLLOW-UP &amp; DESKTOP REMINDER SETTINGS</h2>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+          <!-- Follow-up Sequence Form -->
+          <div class="card-panel" style="background:#091422;">
+            <h3 style="font-size:13px; color:var(--accent-cyan); margin-bottom:10px;">Default Follow-up Intervals</h3>
+            <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:12px;">
+              Configures the default timeline for follow-up reminders. When you log a message sent, these intervals automatically suggest your next reminder date.
+            </p>
+
+            <div class="field-group" style="margin-bottom:10px;">
+              <label class="field-label">Follow-up #1 Interval (Days after First Contact)</label>
+              <input type="number" id="settingInterval1" class="input-control" value="3" min="1" max="30">
+            </div>
+
+            <div class="field-group" style="margin-bottom:10px;">
+              <label class="field-label">Follow-up #2 Interval (Days after First Follow-up)</label>
+              <input type="number" id="settingInterval2" class="input-control" value="5" min="1" max="60">
+            </div>
+
+            <button class="btn-tool btn-accent" onclick="saveSettings()">Save Follow-up Intervals</button>
+          </div>
+
+          <!-- Windows Desktop Notifications & Local Backups Configuration -->
+          <div class="card-panel" style="background:#091422;">
+            <h3 style="font-size:13px; color:var(--accent-emerald); margin-bottom:10px;">Windows Desktop Reminders &amp; Local Backups</h3>
+            <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:12px;">
+              Allows follow-up notifications to appear as native Windows desktop alerts even when this browser tab is closed.
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; color:var(--text-primary); background:#050C16; padding:10px; border-radius:6px; border:1px solid var(--panel-border);">
+                <input type="checkbox" id="settingRemindersEnabled" checked onchange="saveSettings()">
+                <span>🔔 Enable Local Desktop Follow-up Reminders</span>
+              </label>
+
+              <div style="background:#050C16; padding:10px; border-radius:6px; font-size:11px; color:#CBD5E1;">
+                <strong>Local Scripts in Project Folder:</strong><br>
+                &bull; Run <code>Enable_Reminders.bat</code> to start the background monitor.<br>
+                &bull; Run <code>Disable_Reminders.bat</code> to stop reminders anytime.
+              </div>
+
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn-tool" onclick="testNotification()">🔔 Test Desktop Notification</button>
+                <button class="btn-tool btn-accent" onclick="triggerQuickBackup()">💾 Backup Database Now</button>
+                <button class="btn-tool" onclick="openBackupModal()">📂 Manage / Restore Backups</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================== -->
+  <!-- MODAL: + ADD LEAD (QUICK LEAD ENTRY)                       -->
+  <!-- ========================================================== -->
+  <div class="modal-backdrop" id="modalAddLead">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>+ Add New Business Lead</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalAddLead')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddLead" onsubmit="event.preventDefault(); submitNewLead();">
+          <div class="field-grid-2">
+            <div class="field-group">
+              <label class="field-label">Business Name *</label>
+              <input type="text" id="addLeadName" class="input-control" required placeholder="e.g. Apex Phone Repair">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Category / Service</label>
+              <input type="text" id="addLeadCategory" class="input-control" placeholder="e.g. Mobile phone repair">
+            </div>
+          </div>
+
+          <div class="field-grid-2">
+            <div class="field-group">
+              <label class="field-label">Public Phone</label>
+              <input type="text" id="addLeadPhone" class="input-control" placeholder="e.g. (407) 555-0199">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Public Email</label>
+              <input type="email" id="addLeadEmail" class="input-control" placeholder="e.g. info@apexrepair.com">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Official Website</label>
+            <input type="url" id="addLeadWebsite" class="input-control" placeholder="e.g. https://apexrepair.com">
+          </div>
+
+          <div class="field-grid-2">
+            <div class="field-group">
+              <label class="field-label">City / Area</label>
+              <input type="text" id="addLeadCity" class="input-control" placeholder="e.g. Orlando, FL">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Full Street Address</label>
+              <input type="text" id="addLeadAddress" class="input-control" placeholder="e.g. 5135 International Dr">
+            </div>
+          </div>
+
+          <div class="field-grid-2">
+            <div class="field-group">
+              <label class="field-label">Initial CRM Status</label>
+              <select id="addLeadCrmStatus" class="input-control">
+                <option value="NEW">NEW</option>
+                <option value="READY TO CONTACT" selected>READY TO CONTACT</option>
+                <option value="CONTACTED">CONTACTED</option>
+                <option value="QUALIFIED">QUALIFIED</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Next Action / Follow-up Date</label>
+              <input type="date" id="addLeadFollowupDate" class="input-control">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Notes</label>
+            <textarea id="addLeadNotes" class="input-control" rows="2" placeholder="Prospect background, ad observation..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool" onclick="closeModal('modalAddLead')">Cancel</button>
+        <button class="btn-tool btn-accent" onclick="document.getElementById('formAddLead').requestSubmit()">Save Lead</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MODAL: LOG OUTREACH (LOG WHATSAPP / EMAIL SENT)            -->
+  <!-- ========================================================== -->
+  <div class="modal-backdrop" id="modalLogOutreach">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="logOutreachTitle">Log Outreach Sent</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalLogOutreach')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="logLeadId">
+        <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">
+          Record that you have manually dispatched a message. This updates the lead's history and calculates your next follow-up reminder.
+        </p>
+
+        <div class="field-grid-2">
+          <div class="field-group">
+            <label class="field-label">Date Sent</label>
+            <input type="date" id="logDateSent" class="input-control">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Channel</label>
+            <select id="logChannel" class="input-control">
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Email">Email</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-grid-2">
+          <div class="field-group">
+            <label class="field-label">Message Type</label>
+            <select id="logMessageType" class="input-control" onchange="autoSuggestNextFollowupDate()">
+              <option value="First Outreach">First Outreach</option>
+              <option value="Follow-up #1">Follow-up #1</option>
+              <option value="Follow-up #2">Follow-up #2</option>
+              <option value="Custom Pitch">Custom Pitch</option>
+              <option value="Reply Sent">Reply Sent</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Next Follow-up Due Date</label>
+            <input type="date" id="logNextFollowupDate" class="input-control">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Outreach Note / Summary</label>
+          <textarea id="logNote" class="input-control" rows="2" placeholder="Sent offer regarding Google Ads estimates..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool" onclick="closeModal('modalLogOutreach')">Cancel</button>
+        <button class="btn-tool btn-accent" onclick="submitLogOutreach()">Record Outreach</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MODAL: WHATSAPP NUMBER VERIFICATION                        -->
+  <!-- ========================================================== -->
+  <div class="modal-backdrop" id="modalVerifyWhatsApp">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>WhatsApp Verification Control</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalVerifyWhatsApp')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="waLeadId">
+        <div style="background:#091422; border:1px solid var(--panel-border); padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 id="waBizName" style="color:var(--text-primary); font-size:13px;">Business</h4>
+            <span id="waPhoneDisplay" style="color:#25D366; font-family:var(--font-mono); font-size:12px;">+1 407 555 0199</span>
+          </div>
+          <button class="btn-tool" id="btnOpenWaMeLink" onclick="openWaLinkForCurrentLead()">
+            🚀 Open wa.me in Browser
+          </button>
+        </div>
+
+        <p style="font-size:11.5px; color:var(--text-muted); margin-top:8px;">
+          Inspect whether WhatsApp desktop/web opens a valid active chat for this number, then record the verification outcome:
+        </p>
+
+        <div class="field-group" style="margin-top:10px;">
+          <label class="field-label">WhatsApp Status</label>
+          <select id="waStatusSelect" class="input-control">
+            <option value="Available / Chat Opens">Available / Chat Opens</option>
+            <option value="Not Available">Not Available</option>
+            <option value="Uncertain">Uncertain</option>
+            <option value="Not Checked">Not Checked</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Check Notes</label>
+          <input type="text" id="waNotesInput" class="input-control" placeholder="Active WhatsApp business account...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool" onclick="closeModal('modalVerifyWhatsApp')">Cancel</button>
+        <button class="btn-tool btn-accent" onclick="submitWhatsAppVerification()">Save Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MODAL: ADS VERIFICATION (GOOGLE & META)                    -->
+  <!-- ========================================================== -->
+  <div class="modal-backdrop" id="modalVerifyAds">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="verifyAdsModalTitle">Advertising Verification</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalVerifyAds')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="adLeadId">
+        <input type="hidden" id="adPlatform">
+
+        <div style="background:#091422; border:1px solid var(--panel-border); padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 id="adBizName" style="color:var(--text-primary); font-size:13px;">Business</h4>
+            <span id="adTargetDomain" style="color:var(--accent-cyan); font-size:12px;">apexrepair.com</span>
+          </div>
+          <button class="btn-tool btn-accent" id="btnOpenAdLibraryLink" onclick="openOfficialAdLibrarySearch()">
+            🔗 Open Official Search in Browser
+          </button>
+        </div>
+
+        <div class="field-group" style="margin-top:12px;">
+          <label class="field-label">Verification Status *</label>
+          <select id="adStatusSelect" class="input-control">
+            <option value="YES - ACTIVE ADS FOUND">YES - ACTIVE ADS FOUND</option>
+            <option value="NO - NO PUBLIC ADS FOUND">NO - NO PUBLIC ADS FOUND</option>
+            <option value="PAUSED">PAUSED</option>
+            <option value="NEEDS REVIEW">NEEDS REVIEW</option>
+            <option value="NOT CHECKED">NOT CHECKED</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Advertiser / Page Name</label>
+          <input type="text" id="adAdvertiserName" class="input-control" placeholder="Exact advertiser or page name found">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Evidence URL</label>
+          <input type="url" id="adEvidenceUrl" class="input-control" placeholder="https://adstransparency.google.com/advertiser/...">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Verification Notes</label>
+          <input type="text" id="adNotes" class="input-control" placeholder="Running 4 search ad creatives targeting repair...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool" onclick="closeModal('modalVerifyAds')">Cancel</button>
+        <button class="btn-tool btn-accent" onclick="submitAdsVerification()">Save Verification</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MODAL: LEAD DETAIL & CRM HISTORY TIMELINE                  -->
+  <!-- ========================================================== -->
+  <div class="modal-backdrop" id="modalLeadDetail">
+    <div class="modal-dialog" style="max-width:880px;">
+      <div class="modal-header">
+        <h3 id="leadDetailTitle">Lead Details &amp; CRM History</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalLeadDetail')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editLeadId">
+
+        <!-- Top summary row -->
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#050C16; padding:12px 14px; border-radius:8px; border:1px solid var(--panel-border);">
+          <div>
+            <h4 id="detailBizHeading" style="font-size:15px; color:#fff;">Business Name</h4>
+            <span id="detailServiceHeading" style="font-size:12px; color:var(--text-muted);">Category</span>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-tool" onclick="openWhatsAppOutreach(currentDetailLead)">WhatsApp</button>
+            <button class="btn-tool" onclick="openEmailOutreach(currentDetailLead)">Email</button>
+            <button class="btn-tool btn-accent" onclick="openLogOutreachForLead(currentDetailLead.id)">Log Outreach</button>
+          </div>
+        </div>
+
+        <!-- Editable Details -->
+        <div class="field-grid-2">
+          <div class="field-group">
+            <label class="field-label">Business Name</label>
+            <input type="text" id="editName" class="input-control">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Category</label>
+            <input type="text" id="editCategory" class="input-control">
+          </div>
+        </div>
+
+        <div class="field-grid-2">
+          <div class="field-group">
+            <label class="field-label">Phone</label>
+            <input type="text" id="editPhone" class="input-control">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Email</label>
+            <input type="text" id="editEmail" class="input-control">
+          </div>
+        </div>
+
+        <div class="field-grid-2">
+          <div class="field-group">
+            <label class="field-label">Official Website</label>
+            <input type="text" id="editWebsite" class="input-control">
+          </div>
+          <div class="field-group">
+            <label class="field-label">CRM Status</label>
+            <select id="editCrmStatus" class="input-control">
+              <option value="NEW">NEW</option>
+              <option value="READY TO CONTACT">READY TO CONTACT</option>
+              <option value="CONTACTED">CONTACTED</option>
+              <option value="REPLIED">REPLIED</option>
+              <option value="INTERESTED">INTERESTED</option>
+              <option value="FOLLOW-UP DUE">FOLLOW-UP DUE</option>
+              <option value="QUALIFIED">QUALIFIED</option>
+              <option value="CLIENT">CLIENT</option>
+              <option value="NOT INTERESTED">NOT INTERESTED</option>
+              <option value="DO NOT CONTACT">DO NOT CONTACT</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Message Drafts Section -->
+        <div style="background:#091422; border:1px solid var(--panel-border); padding:12px; border-radius:8px;">
+          <h4 style="font-size:12px; color:var(--accent-cyan); text-transform:uppercase; margin-bottom:8px;">
+            Personalized Message Drafts (Copy &amp; Send Yourself)
+          </h4>
+          <div class="field-group" style="margin-bottom:8px;">
+            <div class="field-label-row">
+              <label class="field-label">WhatsApp Opening Pitch</label>
+              <button type="button" class="btn-tool" style="padding:2px 6px; font-size:10.5px;" onclick="copyDraft('editWaDraft')">Copy Pitch</button>
+            </div>
+            <textarea id="editWaDraft" class="input-control" rows="2"></textarea>
+          </div>
+          <div class="field-group">
+            <div class="field-label-row">
+              <label class="field-label">Email Message Body</label>
+              <button type="button" class="btn-tool" style="padding:2px 6px; font-size:10.5px;" onclick="copyDraft('editEmailBodyDraft')">Copy Email</button>
+            </div>
+            <textarea id="editEmailBodyDraft" class="input-control" rows="3"></textarea>
+          </div>
+        </div>
+
+        <!-- Contact History Timeline -->
+        <div>
+          <h4 style="font-size:12px; color:var(--accent-emerald); text-transform:uppercase; margin-bottom:8px;">
+            Contact History &amp; Outreach Audit Log
+          </h4>
+          <div class="timeline-container" id="detailTimelineContainer">
+            <!-- Timeline items populated here -->
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Lead Notes</label>
+          <textarea id="editNotes" class="input-control" rows="2" placeholder="Internal notes..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool" onclick="closeModal('modalLeadDetail')">Cancel</button>
+        <button class="btn-tool btn-accent" onclick="saveLeadDetails()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CSV IMPORT WIZARD -->
+  <div class="modal-backdrop" id="modalImport">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Import Leads from CSV / Excel</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalImport')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="file-dropzone" onclick="document.getElementById('csvFileInput').click()">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" style="margin-bottom:8px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <h4>Click to browse or drop CSV file here</h4>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">Supports UTF-8, Latin-1, and comma/tab separated files</p>
+          <input type="file" id="csvFileInput" accept=".csv,.txt" style="display:none;" onchange="handleFileSelected(this)">
+        </div>
+
+        <div id="importMappingSection" style="display:none;">
+          <h4 style="font-size:12px; text-transform:uppercase; color:var(--accent-cyan);">Column Mapping</h4>
+          <div id="mappingControlsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;"></div>
+          <h4 style="font-size:12px; text-transform:uppercase; color:var(--accent-cyan); margin-top:14px;">Preview First 5 Rows</h4>
+          <div style="overflow-x:auto; max-height:160px; background:#050C16; border-radius:6px; padding:6px;">
+            <table id="previewTable" style="font-size:11px; width:100%; border-collapse:collapse;"></table>
+          </div>
+        </div>
+
+        <div id="importSummarySection" style="display:none; background:rgba(16,185,129,0.1); border:1px solid var(--accent-emerald); padding:12px; border-radius:8px;">
+          <h4 style="color:var(--accent-emerald);">Import Completed!</h4>
+          <div id="importSummaryText" style="font-size:12px; color:#E2E8F0; margin-top:4px;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool" onclick="closeModal('modalImport')">Close</button>
+        <button class="btn-tool btn-accent" id="btnExecuteImport" style="display:none;" onclick="executeImport()">Execute Import</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DUPLICATE REVIEW -->
+  <div class="modal-backdrop" id="modalDuplicates">
+    <div class="modal-dialog" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Duplicate Review &amp; Merging</h3>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="btn-tool btn-accent" id="btnMergeAllHeader" style="display:none; font-weight:700;" onclick="mergeAllDuplicates()">⚡ Merge All Duplicates (1-Click)</button>
+          <button class="btn-close-modal" onclick="closeModal('modalDuplicates')">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" id="duplicateModalBody">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px;">
+          <p style="font-size:12px; color:var(--text-secondary); margin:0;">
+            Review suspected duplicate records identified by normalized website domain, phone number, or address.
+          </p>
+        </div>
+        <div id="duplicatePairsContainer" style="display:flex; flex-direction:column; gap:16px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool btn-accent" id="btnMergeAllDuplicates" style="display:none; font-weight:700;" onclick="mergeAllDuplicates()">⚡ Merge All Duplicates (1-Click)</button>
+        <button class="btn-tool" id="btnUndoLastMerge" style="display:none; color:var(--warning);" onclick="undoLastMerge()">↩ Undo Last Merge</button>
+        <button class="btn-tool" onclick="closeModal('modalDuplicates')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DATABASE BACKUPS -->
+  <div class="modal-backdrop" id="modalBackups">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Local Database Management &amp; Backups</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalBackups')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(19,36,58,0.5); padding:12px; border-radius:8px; border:1px solid var(--panel-border);">
+          <div>
+            <h4 style="font-size:13px; color:var(--text-primary);">Point-in-Time SQLite Backup</h4>
+            <p style="font-size:11px; color:var(--text-muted);">Creates a safe copy in your local `data/backups/` directory.</p>
+          </div>
+          <button class="btn-tool btn-accent" onclick="createBackup()">Create Backup Now</button>
+        </div>
+
+        <div style="margin-top:10px;">
+          <h4 style="font-size:11px; text-transform:uppercase; color:var(--accent-cyan); letter-spacing:0.8px; margin-bottom:8px;">Available Local Backups</h4>
+          <div id="backupListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:180px; overflow-y:auto;"></div>
+        </div>
+
+        <div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); padding:10px; border-radius:8px; margin-top:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; color:var(--accent-emerald); font-weight:600;">PRAGMA integrity_check:</span>
+            <span id="dbIntegrityStatus" style="font-size:11px; font-family:var(--font-mono); color:#fff;">Checking...</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool" onclick="closeModal('modalBackups')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MODAL: DAILY STICKY NOTE (ADD / EDIT)                      -->
+  <!-- ========================================================== -->
+  <div class="modal-backdrop" id="modalDailyNote">
+    <div class="modal-dialog" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 id="dailyNoteModalTitle">📝 Daily Outreach Sticky Note</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalDailyNote')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="noteEditId">
+
+        <div class="field-grid-2">
+          <div class="field-group">
+            <label class="field-label">Note Title / Topic</label>
+            <input type="text" id="noteInputTitle" class="input-control" placeholder="e.g. Morning WhatsApp Outreach Batch">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Category</label>
+            <select id="noteInputCategory" class="input-control">
+              <option value="Outreach" selected>Outreach</option>
+              <option value="Follow-up">Follow-up</option>
+              <option value="Research">Research</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label-row">
+            <label class="field-label">Note Content (English or Banglish text)</label>
+            <span class="field-hint-badge">Supports #1-15, in 3 days, etc.</span>
+          </div>
+          <textarea 
+            id="noteInputContent" 
+            class="input-control" 
+            rows="6" 
+            placeholder="Type your notes naturally. Examples:&#10;• Leads #1-15 WhatsApp e send korechi, follow up in 3 days&#10;• Ajke lead 30 theke 45 porjonto WhatsApp message dilam. Response ashle update korbo&#10;• Lead 12 replied on WhatsApp, interested in Google Ads audit"
+            style="font-family:var(--font-sans); line-height:1.6;"
+          ></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#091422; padding:10px 14px; border-radius:6px; border:1px solid var(--panel-border);">
+          <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; color:var(--text-primary);">
+            <input type="checkbox" id="noteInputIsPinned">
+            <span>⭐ Pin to top of Daily Notes</span>
+          </label>
+          <span style="font-size:11px; color:var(--text-muted);" id="noteCreatedAtHint"></span>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between;">
+        <button class="btn-tool btn-danger" id="btnDeleteNoteFromModal" style="display:none;" onclick="deleteNoteFromModal()">Delete</button>
+        <div style="display:flex; gap:8px; margin-left:auto;">
+          <button class="btn-tool" onclick="closeModal('modalDailyNote')">Cancel</button>
+          <button class="btn-tool" onclick="saveDailyNote(false)">Save Draft</button>
+          <button class="btn-tool btn-accent" onclick="saveAndInterpretDailyNote()">Save &amp; Parse for CRM ⚡</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MODAL: SMART TEXT-TO-CRM INTERPRETATION PREVIEW           -->
+  <!-- ========================================================== -->
+  <div class="modal-backdrop" id="modalNoteInterpretation">
+    <div class="modal-dialog" style="max-width: 820px;">
+      <div class="modal-header">
+        <h3>⚡ Smart Text-to-CRM Interpretation Preview</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalNoteInterpretation')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="interpNoteId">
+
+        <!-- Safety Notification Banner -->
+        <div id="interpActionNotice" class="interp-notice-banner" style="margin-bottom:12px; padding:10px 14px; border-radius:6px; font-size:12px; font-weight:500;">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Note Text Summary Box -->
+        <div style="background:#050C16; border:1px solid var(--panel-border); padding:10px 14px; border-radius:6px; margin-bottom:12px;">
+          <span style="font-size:11px; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.8px;">Original Note</span>
+          <div id="interpRawNoteText" style="font-size:12.5px; color:#F1F5F9; margin-top:4px; font-style:italic;"></div>
+        </div>
+
+        <!-- Detected Metadata Overview -->
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:14px;">
+          <div class="interp-stat-box">
+            <span class="interp-stat-title">CHANNEL</span>
+            <span class="interp-stat-val" id="interpDetectedChannel">WhatsApp</span>
+          </div>
+          <div class="interp-stat-box">
+            <span class="interp-stat-title">OUTREACH TYPE</span>
+            <span class="interp-stat-val" id="interpDetectedType">COMPLETED</span>
+          </div>
+          <div class="interp-stat-box">
+            <span class="interp-stat-title">SCHEDULED REMINDER</span>
+            <span class="interp-stat-val" id="interpFollowupDate" style="color:var(--warning);">None</span>
+          </div>
+          <div class="interp-stat-box">
+            <span class="interp-stat-title">LEADS DETECTED</span>
+            <span class="interp-stat-val" id="interpLeadCount" style="color:var(--accent-emerald);">0</span>
+          </div>
+        </div>
+
+        <!-- Missing Leads Warning (if any) -->
+        <div id="interpMissingWarning" style="display:none; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); border-radius:6px; padding:8px 12px; margin-bottom:12px; color:#FCA5A5; font-size:12px;">
+          <strong>⚠️ Missing Leads:</strong> <span id="interpMissingList"></span>
+        </div>
+
+        <!-- Affected Leads Preview Table -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:12px; font-weight:600; color:var(--text-primary); text-transform:uppercase; letter-spacing:0.5px;">
+              Resolved Database Leads to Update:
+            </span>
+            <span style="font-size:11px; color:var(--text-muted);" id="interpTableCountBadge">0 leads</span>
+          </div>
+          <div style="max-height: 220px; overflow-y:auto; border:1px solid var(--panel-border); border-radius:6px;">
+            <table class="leads-table" style="font-size:12px; margin:0;">
+              <thead>
+                <tr>
+                  <th width="65">ID</th>
+                  <th>BUSINESS</th>
+                  <th>CURRENT STATUS</th>
+                  <th>NEW STATUS</th>
+                  <th>SCHEDULED REMINDER</th>
+                </tr>
+              </thead>
+              <tbody id="interpLeadsTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Editable Overrides Section (toggleable) -->
+        <div id="interpOverrideSection" style="display:none; background:#091422; border:1px solid var(--panel-border); padding:12px; border-radius:6px;">
+          <span style="font-size:12px; font-weight:600; color:var(--accent-cyan); text-transform:uppercase;">Custom Adjustment / Override</span>
+          <div class="field-grid-2" style="margin-top:8px;">
+            <div class="field-group">
+              <label class="field-label">Override Channel</label>
+              <select id="overrideChannel" class="input-control">
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Email">Email</option>
+                <option value="Phone">Phone</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Override Follow-up Date</label>
+              <input type="date" id="overrideFollowupDate" class="input-control">
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool" onclick="closeModal('modalNoteInterpretation')">Cancel</button>
+        <button class="btn-tool" id="btnToggleInterpEdit" onclick="toggleInterpEditMode()">Edit Interpretation</button>
+        <button class="btn-tool btn-accent" id="btnApplyCrmUpdates" onclick="applyInterpretedCrmUpdates()">
+          Apply Updates ⚡
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- MODAL: GOOGLE MAPS 1-CLICK EXTRACTOR GUIDE                -->
+  <!-- ========================================================== -->
+  <div class="modal-backdrop" id="modalGmapsGuide">
+    <div class="modal-dialog" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 style="color:var(--accent-emerald); display:flex; align-items:center; gap:8px;">
+          🗺️ Google Maps 1-Click Extractor Guide (৩টি সহজ ধাপ)
+        </h3>
+        <button class="btn-close-modal" onclick="closeModal('modalGmapsGuide')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#050C16; border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:16px; margin-bottom:16px;">
+          <h4 style="color:#FFF; font-size:14px; margin-bottom:8px;">
+            গুগল ম্যাপস থেকে শত শত লিড আনার সবচেয়ে দ্রুত ও ১০০% ফ্রি পদ্ধতি:
+          </h4>
+          <p style="font-size:12px; color:var(--text-secondary); line-height:1.6; margin:0;">
+            এই বুকমার্কলেট সরাসরি আপনার স্বাভাবিক ব্রাউজার সেশনে কাজ করে। ফলে গুগল কখনো রোবট/ক্যাপচা (CAPTCHA) ব্লক দেয় না এবং কোনো পেইড API কি ছাড়াই আপনি যেকোনো শহর থেকে আনলিমিটেড লিড কালেক্ট করতে পারবেন।
+          </p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; gap:12px; align-items:flex-start; background:#0B1626; padding:12px; border-radius:6px; border:1px solid var(--panel-border);">
+            <div style="background:var(--accent-emerald); color:#000; font-weight:800; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</div>
+            <div>
+              <div style="font-weight:700; color:#FFF; font-size:13px; margin-bottom:4px;">বুকমার্ক বারে বাটনটি রাখুন (Drag to Bookmarks Bar)</div>
+              <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+                Lead Finder পেজের <strong style="color:var(--accent-emerald);">"⭐ 2. Drag to Bookmarks: ⚡ Extract to Pinora"</strong> বাটনটিকে মাউস দিয়ে চেপে ধরে টেনে আপনার ক্রোম/ব্রাউজারের বুকমার্ক বারে (Bookmarks Bar) ছেড়ে দিন।<br>
+                <span style="color:var(--accent-cyan);">💡 টিপ: বুকমার্ক বার না দেখা গেলে কী-বোর্ডে <strong>Ctrl + Shift + B</strong> চাপুন।</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; align-items:flex-start; background:#0B1626; padding:12px; border-radius:6px; border:1px solid var(--panel-border);">
+            <div style="background:var(--accent-cyan); color:#000; font-weight:800; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</div>
+            <div>
+              <div style="font-weight:700; color:#FFF; font-size:13px; margin-bottom:4px;">গুগল ম্যাপস সার্চ ওপেন করুন</div>
+              <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+                <strong style="color:var(--accent-cyan);">"🗺️ 1. Open Search in Google Maps"</strong> বাটনে ক্লিক করুন। গুগল ম্যাপসের নতুন ট্যাবে আপনার দেওয়া কিওয়ার্ড ও লোকেশন (যেমন: <em>double glazing Dublin</em>) দিয়ে সরাসরি সার্চ ওপেন হবে।
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; align-items:flex-start; background:#0B1626; padding:12px; border-radius:6px; border:1px solid var(--panel-border);">
+            <div style="background:#A78BFA; color:#000; font-weight:800; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</div>
+            <div>
+              <div style="font-weight:700; color:#FFF; font-size:13px; margin-bottom:4px;">স্ক্রল করুন এবং ১-ক্লিকে লিড ইম্পোর্ট করুন!</div>
+              <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+                গুগল ম্যাপসের বাম পাশের রেজাল্ট প্যানেলে মাউস দিয়ে একটু স্ক্রল ডাউন করুন যাতে ২০-৫০+ টি কোম্পানি লোড হয়।<br>
+                এরপর আপনার বুকমার্ক বারে সেভ করা <strong style="color:var(--accent-emerald);">"⚡ Extract to Pinora"</strong> বাটনে ১টি ক্লিক করুন!<br>
+                তৎক্ষণাৎ সবগুলো ব্যবসার নাম, ফোন, ওয়েবসাইট, রেটিং ও ঠিকানা আপনার লোকাল Pinora CRM-এ সেভ হয়ে যাবে।
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool btn-accent" onclick="closeModal('modalGmapsGuide')">বুঝেছি, ধন্যবাদ! (Got it)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cloud Mode IndexedDB Storage Adapter (Activates on Vercel/Web) -->
+  <script src="js/cloud_adapter.js"></script>
+  <!-- Application Controller Script -->
+  <script src="js/app.js"></script>
+</body>
+</html>
