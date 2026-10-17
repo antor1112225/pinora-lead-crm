@@ -26,11 +26,70 @@ let cachedSettings = { followup_interval_1: 3, followup_interval_2: 5 };
 // Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   updateQueryPreview();
+  initDuplicateGuards();
   loadLeads();
   fetchCrmStats();
   loadSettings();
   startTelemetryPolling();
 });
+
+function initDuplicateGuards() {
+  if (!window.DuplicateGuard) return;
+
+  // 1. Validator for Modal: + Add New Business Lead
+  window.addLeadValidator = DuplicateGuard.attachModalValidator({
+    formId: 'formAddLead',
+    nameInputId: 'addLeadName',
+    phoneInputId: 'addLeadPhone',
+    emailInputId: 'addLeadEmail',
+    websiteInputId: 'addLeadWebsite',
+    alertContainerId: 'addLeadDuplicateAlert',
+    submitBtnId: 'btnAddLeadSubmit',
+    overrideCheckboxId: 'chkOverrideAddLeadDupe',
+    getExcludeId: () => null,
+    getLeadPool: () => window.allCachedLeads || window.cachedLeads || []
+  });
+
+  // 2. Validator for Modal: Lead Details & CRM History
+  window.editLeadValidator = DuplicateGuard.attachModalValidator({
+    formId: 'modalLeadDetail',
+    nameInputId: 'editName',
+    phoneInputId: 'editPhone',
+    emailInputId: 'editEmail',
+    websiteInputId: 'editWebsite',
+    alertContainerId: 'editLeadDuplicateAlert',
+    submitBtnId: 'btnSaveLeadDetail',
+    overrideCheckboxId: 'chkOverrideEditLeadDupe',
+    getExcludeId: () => {
+      const idEl = document.getElementById('editLeadId');
+      return idEl ? idEl.value : null;
+    },
+    getLeadPool: () => window.allCachedLeads || window.cachedLeads || []
+  });
+
+  // 3. Auxiliary Guard: Note / Task Duplicate Title Warning
+  const noteTitleInp = document.getElementById("noteInputTitle");
+  if (noteTitleInp) {
+    noteTitleInp.addEventListener("input", () => {
+      const titleVal = noteTitleInp.value.trim().toLowerCase();
+      const existing = (cachedDailyNotes || []).some(n => (n.title || '').trim().toLowerCase() === titleVal);
+      let noteBadge = noteTitleInp.parentNode.querySelector(".inline-dupe-tag");
+      if (titleVal.length >= 3 && existing) {
+        noteTitleInp.classList.add("input-field-duplicate-warning");
+        if (!noteBadge) {
+          noteBadge = document.createElement("span");
+          noteBadge.className = "inline-dupe-tag";
+          noteBadge.textContent = "⚠️ Duplicate Task/Note Title";
+          const lbl = noteTitleInp.parentNode.querySelector(".field-label");
+          if (lbl) lbl.appendChild(noteBadge);
+        }
+      } else {
+        noteTitleInp.classList.remove("input-field-duplicate-warning");
+        if (noteBadge) noteBadge.remove();
+      }
+    });
+  }
+}
 
 // ==========================================
 // 1. TAB NAVIGATION
@@ -230,7 +289,7 @@ function getFilterParams() {
   if (search) params.append("search", search);
   if (city) params.append("city", city);
   if (category) params.append("category", category);
-  if (crmStatus) params.append("crm_status", crmStatus);
+  if (crmStatus && crmStatus !== "DUPLICATES") params.append("crm_status", crmStatus);
   if (adsStatus) params.append("ads_filter", adsStatus);
   if (waStatus) params.append("whatsapp_status", waStatus);
 
@@ -248,17 +307,83 @@ function getFilterParams() {
 }
 
 async function loadLeads() {
+  const isDupeFilter = document.getElementById("filterCrmStatus") && document.getElementById("filterCrmStatus").value === "DUPLICATES";
   const params = getFilterParams();
-  params.append("limit", "150");
+  params.append("limit", "250");
 
   try {
     const res = await fetch(`/api/leads?${params.toString()}`);
     if (!res.ok) return;
     const data = await res.json();
-    window.cachedLeads = data.leads || [];
-    renderLeadsTable(window.cachedLeads, data.total || 0);
+    window.allCachedLeads = data.leads || [];
+
+    // Reactive Global Directory Deduplication Scan
+    if (window.DuplicateGuard) {
+      const dupeScan = DuplicateGuard.computeDirectoryDuplicates(window.allCachedLeads);
+      window.activeDuplicateIds = dupeScan.duplicateIdSet;
+
+      // Update dropdown option badge
+      const dupeOpt = document.getElementById("filterStatusDuplicatesOption");
+      if (dupeOpt) {
+        dupeOpt.textContent = `⚠️ Duplicate Contacts (${dupeScan.count})`;
+      }
+
+      // Render top dismissible pipeline banner
+      renderPipelineDupeBanner(dupeScan.count);
+    }
+
+    let displayLeads = window.allCachedLeads;
+    if (isDupeFilter) {
+      displayLeads = displayLeads.filter(l => window.activeDuplicateIds && window.activeDuplicateIds.has(l.id));
+    }
+
+    window.cachedLeads = displayLeads;
+    renderLeadsTable(displayLeads, isDupeFilter ? displayLeads.length : (data.total || displayLeads.length));
   } catch (err) {
     console.error("Failed to load leads:", err);
+  }
+}
+
+function renderPipelineDupeBanner(count) {
+  const container = document.getElementById("pipelineDupeBannerContainer");
+  if (!container) return;
+
+  if (count <= 0 || window.pipelineDupeBannerDismissed) {
+    container.innerHTML = "";
+    container.style.display = "none";
+    return;
+  }
+
+  container.style.display = "block";
+  container.innerHTML = `
+    <div class="pipeline-dupe-banner animate-fade-in" id="pipelineDupeBanner">
+      <div class="pipeline-dupe-left">
+        <span class="pipeline-dupe-icon">⚠️</span>
+        <span class="pipeline-dupe-msg"><strong>${count} Duplicate Contacts</strong> Detected across your active pipeline</span>
+      </div>
+      <div class="pipeline-dupe-actions">
+        <button type="button" class="btn-tool btn-review-dupes" onclick="filterByDuplicates()">Review Duplicates (${count})</button>
+        <button type="button" class="btn-tool btn-merge-quick" onclick="openDuplicateModal()">⚡ 1-Click Merge</button>
+        <button type="button" class="btn-close-banner" onclick="dismissPipelineDupeBanner()" title="Dismiss">&times;</button>
+      </div>
+    </div>
+  `;
+}
+
+function filterByDuplicates() {
+  const filterSelect = document.getElementById("filterCrmStatus");
+  if (filterSelect) {
+    filterSelect.value = "DUPLICATES";
+    loadLeads();
+  }
+}
+
+function dismissPipelineDupeBanner() {
+  window.pipelineDupeBannerDismissed = true;
+  const container = document.getElementById("pipelineDupeBannerContainer");
+  if (container) {
+    container.innerHTML = "";
+    container.style.display = "none";
   }
 }
 
@@ -322,8 +447,10 @@ function renderLeadsTable(leads, totalCount) {
     const crmSt = lead.crm_status || lead.outreach_status || "NEW";
     const crmSelectClass = getCrmStatusClass(crmSt);
 
+    const isDupe = window.activeDuplicateIds && window.activeDuplicateIds.has(lead.id);
+
     return `
-      <tr class="${isSelected ? 'selected' : ''}" id="leadRow_${lead.id}">
+      <tr class="${isSelected ? 'selected' : ''} ${isDupe ? 'row-is-duplicate' : ''}" id="leadRow_${lead.id}">
         <td>
           <input type="checkbox" onchange="toggleSelectLead(${lead.id}, this)" ${isSelected ? 'checked' : ''}>
         </td>
@@ -342,9 +469,10 @@ function renderLeadsTable(leads, totalCount) {
         <!-- Business Name & Permanent Lead Number -->
         <td>
           <div class="biz-title-cell">
-            <div style="display:flex; align-items:center; gap:6px;">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
               <span class="lead-id-badge" title="Permanent Lead ID">${escapeHtml(leadNum)}</span>
               <span class="biz-name" title="${escapeHtml(lead.business_name)}">${escapeHtml(lead.business_name)}</span>
+              ${isDupe ? `<span class="dupe-row-pill" title="Shared contact data detected with another lead in pipeline">⚠️ Duplicate</span>` : ''}
             </div>
             <span class="biz-category">${escapeHtml(lead.category || 'Local Business')}${lead.city ? ' &bull; ' + escapeHtml(lead.city) : ''}</span>
           </div>
@@ -749,6 +877,26 @@ function openAddLeadModal() {
   document.getElementById("addLeadFollowupDate").value = "";
   document.getElementById("addLeadNotes").value = "";
 
+  // Reset duplicate alert card and input warnings
+  const alertContainer = document.getElementById("addLeadDuplicateAlert");
+  if (alertContainer) {
+    alertContainer.innerHTML = "";
+    alertContainer.style.display = "none";
+  }
+  const submitBtn = document.getElementById("btnAddLeadSubmit");
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Save Lead";
+  }
+  ["addLeadName", "addLeadCategory", "addLeadPhone", "addLeadEmail", "addLeadWebsite"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove("input-field-duplicate-warning");
+      const badge = el.parentNode.querySelector(".inline-dupe-tag");
+      if (badge) badge.remove();
+    }
+  });
+
   openModal("modalAddLead");
 }
 
@@ -756,6 +904,14 @@ async function submitNewLead() {
   const name = document.getElementById("addLeadName").value.trim();
   if (!name) {
     alert("Please enter a business name.");
+    return;
+  }
+
+  // Fail-Safe Duplicate Submission Lock
+  const alertContainer = document.getElementById("addLeadDuplicateAlert");
+  const overrideCb = document.getElementById("chkOverrideAddLeadDupe");
+  if (alertContainer && alertContainer.style.display !== "none" && (!overrideCb || !overrideCb.checked)) {
+    alert("⚠️ Duplicate Contact / Data detected! Please review the warning alert or check 'Allow adding duplicate record anyway'.");
     return;
   }
 
@@ -1389,10 +1545,35 @@ async function openLeadDetail(id) {
     document.getElementById("editWaDraft").value = lead.whatsapp_draft || "";
     document.getElementById("editEmailBodyDraft").value = lead.email_body_draft || "";
 
+    // Reset duplicate alert card and warnings
+    const alertContainer = document.getElementById("editLeadDuplicateAlert");
+    if (alertContainer) {
+      alertContainer.innerHTML = "";
+      alertContainer.style.display = "none";
+    }
+    const saveBtn = document.getElementById("btnSaveLeadDetail");
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Save Changes";
+    }
+    ["editName", "editCategory", "editPhone", "editEmail", "editWebsite"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove("input-field-duplicate-warning");
+        const badge = el.parentNode.querySelector(".inline-dupe-tag");
+        if (badge) badge.remove();
+      }
+    });
+
     // Contact history timeline
     loadLeadTimeline(lead.id);
 
     openModal("modalLeadDetail");
+
+    // Trigger validation for edit modal
+    if (window.editLeadValidator && typeof window.editLeadValidator.validate === 'function') {
+      window.editLeadValidator.validate();
+    }
   } catch (err) {
     alert("Error loading lead details: " + err);
   }
@@ -1433,6 +1614,15 @@ async function loadLeadTimeline(leadId) {
 
 async function saveLeadDetails() {
   const id = document.getElementById("editLeadId").value;
+
+  // Fail-Safe Duplicate Submission Lock
+  const alertContainer = document.getElementById("editLeadDuplicateAlert");
+  const overrideCb = document.getElementById("chkOverrideEditLeadDupe");
+  if (alertContainer && alertContainer.style.display !== "none" && (!overrideCb || !overrideCb.checked)) {
+    alert("⚠️ Duplicate Contact / Data detected! Please review the warning alert or check 'Allow adding duplicate record anyway'.");
+    return;
+  }
+
   const payload = {
     business_name: document.getElementById("editName").value.trim(),
     category: document.getElementById("editCategory").value.trim(),
@@ -1692,6 +1882,7 @@ async function handleFileSelected(input) {
 
 function renderImportPreview(preview) {
   currentStagedToken = preview.token;
+  window.currentImportPreview = preview;
   const mappingSection = document.getElementById("importMappingSection");
   mappingSection.style.display = "block";
   document.getElementById("btnExecuteImport").style.display = "inline-flex";
@@ -1718,7 +1909,7 @@ function renderImportPreview(preview) {
     return `
       <div class="field-group">
         <label class="field-label">${f.label}</label>
-        <select class="input-control" data-app-field="${f.key}">
+        <select class="input-control" data-app-field="${f.key}" onchange="updateImportBatchDeduplication()">
           <option value="">-- Do Not Import --</option>
           ${headers.map(h => `
             <option value="${escapeHtml(h)}" ${h === currentMatch ? 'selected' : ''}>${escapeHtml(h)}</option>
@@ -1728,14 +1919,111 @@ function renderImportPreview(preview) {
     `;
   }).join("");
 
-  const previewTable = document.getElementById("previewTable");
+  updateImportBatchDeduplication();
+}
+
+function updateImportBatchDeduplication() {
+  if (!window.currentImportPreview) return;
+  const preview = window.currentImportPreview;
+  const headers = preview.headers;
   const pRows = preview.preview_rows || [];
-  let tableHtml = "<thead><tr>" + headers.map(h => `<th style="padding:6px; border:1px solid #1E293B; color:var(--accent-cyan);">${escapeHtml(h)}</th>`).join("") + "</tr></thead><tbody>";
-  pRows.forEach(r => {
-    tableHtml += "<tr>" + headers.map(h => `<td style="padding:4px 6px; border:1px solid #1E293B; color:#CBD5E1;">${escapeHtml(r[h] || '')}</td>`).join("") + "</tr>";
+
+  const mapping = {};
+  const selects = document.querySelectorAll("#mappingControlsGrid select");
+  selects.forEach(s => {
+    const appField = s.getAttribute("data-app-field");
+    const chosenHeader = s.value;
+    if (chosenHeader) mapping[appField] = chosenHeader;
+  });
+
+  const pool = window.allCachedLeads || window.cachedLeads || [];
+  let scanResult = { rows: [], duplicateCount: 0, freshCount: pRows.length, totalRows: pRows.length };
+
+  if (window.DuplicateGuard && mapping.business_name) {
+    scanResult = DuplicateGuard.scanBatchRecords(pRows, mapping, pool);
+  }
+  window.currentBatchScan = scanResult;
+
+  const banner = document.getElementById("importDuplicateBanner");
+  const autoSkipContainer = document.getElementById("importAutoSkipContainer");
+  const freshCountEl = document.getElementById("importFreshReadyCount");
+
+  if (scanResult.duplicateCount > 0) {
+    if (banner) {
+      banner.style.display = "block";
+      banner.innerHTML = `
+        <div class="pipeline-dupe-banner animate-fade-in" style="background:rgba(245,158,11,0.12); border:1px solid var(--warning); padding:10px 14px; border-radius:6px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:18px;">⚠️</span>
+            <span style="font-size:12px; color:#FCD34D;">
+              <strong>${scanResult.duplicateCount} Duplicate Contact(s) Detected</strong> in uploaded file (${scanResult.freshCount} fresh records ready to import)
+            </span>
+          </div>
+          <span style="font-size:11px; background:rgba(245,158,11,0.25); color:#FBBF24; padding:2px 8px; border-radius:12px; font-weight:700;">2-Tier Scan</span>
+        </div>
+      `;
+    }
+    if (autoSkipContainer) {
+      autoSkipContainer.style.display = "flex";
+    }
+    if (freshCountEl) {
+      freshCountEl.textContent = scanResult.freshCount;
+    }
+  } else {
+    if (banner) {
+      banner.innerHTML = "";
+      banner.style.display = "none";
+    }
+    if (autoSkipContainer) {
+      autoSkipContainer.style.display = "none";
+    }
+  }
+
+  // Render preview table with Deduplication Status column
+  const previewTable = document.getElementById("previewTable");
+  let tableHtml = "<thead><tr>" + 
+    `<th style="padding:6px; border:1px solid #1E293B; color:var(--accent-emerald);">DEDUPLICATION STATUS</th>` +
+    headers.map(h => `<th style="padding:6px; border:1px solid #1E293B; color:var(--accent-cyan);">${escapeHtml(h)}</th>`).join("") + 
+    "</tr></thead><tbody>";
+
+  pRows.forEach((r, idx) => {
+    const rowScan = scanResult.rows && scanResult.rows[idx] ? scanResult.rows[idx] : null;
+    let statusPill = `<span class="batch-clean-tag">✓ Clean Record</span>`;
+
+    if (rowScan && rowScan.isBatchDuplicate) {
+      statusPill = `<span class="batch-dupe-inbatch" title="${escapeHtml(rowScan.batchDetail)}">⚠️ Duplicate in Batch (Repeated)</span>`;
+    } else if (rowScan && rowScan.isCrmDuplicate) {
+      const matchTag = rowScan.crmMatch && rowScan.crmMatch.matchedFields ? rowScan.crmMatch.matchedFields.map(m => m.label).join(', ') : 'CRM';
+      statusPill = `<span class="batch-dupe-tag" title="Matches existing database record">⚠️ Duplicate in CRM (${escapeHtml(matchTag)})</span>`;
+    }
+
+    tableHtml += "<tr>" +
+      `<td style="padding:4px 6px; border:1px solid #1E293B;">${statusPill}</td>` +
+      headers.map(h => `<td style="padding:4px 6px; border:1px solid #1E293B; color:#CBD5E1;">${escapeHtml(r[h] || '')}</td>`).join("") +
+      "</tr>";
   });
   tableHtml += "</tbody>";
   previewTable.innerHTML = tableHtml;
+
+  onAutoSkipDuplicatesChange();
+}
+
+function onAutoSkipDuplicatesChange() {
+  const autoSkipCb = document.getElementById("chkAutoSkipDuplicates");
+  const autoSkip = autoSkipCb ? autoSkipCb.checked : true;
+  const btn = document.getElementById("btnExecuteImport");
+  if (!btn) return;
+
+  const scan = window.currentBatchScan;
+  if (scan && scan.duplicateCount > 0) {
+    if (autoSkip) {
+      btn.textContent = `Execute Import (${scan.freshCount} Fresh Records)`;
+    } else {
+      btn.textContent = `Execute Import (${scan.totalRows} Total Records)`;
+    }
+  } else {
+    btn.textContent = "Execute Import";
+  }
 }
 
 async function executeImport() {
@@ -1754,13 +2042,17 @@ async function executeImport() {
     return;
   }
 
+  const autoSkipCb = document.getElementById("chkAutoSkipDuplicates");
+  const autoSkip = autoSkipCb ? autoSkipCb.checked : true;
+
   try {
     const res = await fetch("/api/import/execute", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         token: currentStagedToken,
-        mapping: mapping
+        mapping: mapping,
+        skip_duplicates: autoSkip
       })
     });
     const data = await res.json();

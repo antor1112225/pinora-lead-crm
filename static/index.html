@@ -263,6 +263,7 @@
               <option value="CLIENT">CLIENT</option>
               <option value="NOT INTERESTED">NOT INTERESTED</option>
               <option value="DO NOT CONTACT">DO NOT CONTACT</option>
+              <option value="DUPLICATES" id="filterStatusDuplicatesOption" style="color:#F59E0B; font-weight:700;">⚠️ Duplicate Contacts (0)</option>
             </select>
           </div>
           <div class="refine-input-group">
@@ -321,6 +322,9 @@
           <div class="filter-active-summary" id="filterSummaryText">No filters active</div>
         </div>
       </div>
+
+      <!-- Retroactive Pipeline Duplicate Alert Banner Container -->
+      <div id="pipelineDupeBannerContainer"></div>
 
       <!-- Compact Lead Table Matching Screenshot -->
       <div class="table-wrapper">
@@ -821,11 +825,14 @@ roofing contractor</textarea>
             <label class="field-label">Notes</label>
             <textarea id="addLeadNotes" class="input-control" rows="2" placeholder="Prospect background, ad observation..."></textarea>
           </div>
+
+          <!-- Real-Time Duplicate Validation Alert Card Container -->
+          <div id="addLeadDuplicateAlert" style="display:none; margin-top:14px;"></div>
         </form>
       </div>
       <div class="modal-footer">
         <button class="btn-tool" onclick="closeModal('modalAddLead')">Cancel</button>
-        <button class="btn-tool btn-accent" onclick="document.getElementById('formAddLead').requestSubmit()">Save Lead</button>
+        <button class="btn-tool btn-accent" id="btnAddLeadSubmit" onclick="document.getElementById('formAddLead').requestSubmit()">Save Lead</button>
       </div>
     </div>
   </div>
@@ -1097,10 +1104,13 @@ roofing contractor</textarea>
           <label class="field-label">Lead Notes</label>
           <textarea id="editNotes" class="input-control" rows="2" placeholder="Internal notes..."></textarea>
         </div>
+
+        <!-- Real-Time Duplicate Validation Alert Card Container -->
+        <div id="editLeadDuplicateAlert" style="display:none; margin:14px 0;"></div>
       </div>
       <div class="modal-footer">
         <button class="btn-tool" onclick="closeModal('modalLeadDetail')">Cancel</button>
-        <button class="btn-tool btn-accent" onclick="saveLeadDetails()">Save Changes</button>
+        <button class="btn-tool btn-accent" id="btnSaveLeadDetail" onclick="saveLeadDetails()">Save Changes</button>
       </div>
     </div>
   </div>
@@ -1125,6 +1135,17 @@ roofing contractor</textarea>
         </div>
 
         <div id="importMappingSection" style="display:none;">
+          <!-- Two-Tier Rapid Bulk Deduplication Alert Banner -->
+          <div id="importDuplicateBanner" style="display:none; margin-bottom:12px;"></div>
+          
+          <!-- Auto-Skip Duplicates Toggle -->
+          <div id="importAutoSkipContainer" style="display:none; align-items:center; gap:8px; margin-bottom:12px; background:#0B1626; padding:8px 12px; border-radius:6px; border:1px solid var(--panel-border);">
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color:var(--text-primary); cursor:pointer;">
+              <input type="checkbox" id="chkAutoSkipDuplicates" checked onchange="onAutoSkipDuplicatesChange()">
+              <span>Auto-skip duplicates (<strong id="importFreshReadyCount" style="color:var(--accent-emerald);">0</strong> fresh records ready)</span>
+            </label>
+          </div>
+
           <h4 style="font-size:12px; text-transform:uppercase; color:var(--accent-cyan);">Column Mapping</h4>
           <div id="mappingControlsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;"></div>
           <h4 style="font-size:12px; text-transform:uppercase; color:var(--accent-cyan); margin-top:14px;">Preview First 5 Rows</h4>
@@ -1433,6 +1454,8 @@ roofing contractor</textarea>
     </div>
   </div>
 
+  <!-- Enterprise-Grade Real-Time Duplicate Detection, Prevention & Directory Scanner -->
+  <script src="js/duplicate_guard.js"></script>
   <!-- Cloud Mode IndexedDB Storage Adapter (Activates on Vercel/Web) -->
   <script src="js/cloud_adapter.js"></script>
   <!-- Application Controller Script -->

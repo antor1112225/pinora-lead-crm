@@ -160,11 +160,14 @@
 
       // 3. Leads Search & List
       if (pathname === "/api/leads" && method === "GET") {
-        const query = (parsed.searchParams.get("query") || "").toLowerCase();
+        const query = (parsed.searchParams.get("search") || parsed.searchParams.get("query") || "").toLowerCase();
+        const cityFilter = (parsed.searchParams.get("city") || "").toLowerCase();
+        const catFilter = (parsed.searchParams.get("category") || "").toLowerCase();
         const crmStatus = parsed.searchParams.get("crm_status") || "";
-        const adsStatus = parsed.searchParams.get("ads_status") || "";
+        const adsStatus = parsed.searchParams.get("ads_filter") || parsed.searchParams.get("ads_status") || "";
+        const limitParam = parseInt(parsed.searchParams.get("limit") || parsed.searchParams.get("per_page") || "250", 10);
         const page = parseInt(parsed.searchParams.get("page") || "1", 10);
-        const perPage = parseInt(parsed.searchParams.get("per_page") || "25", 10);
+        const perPage = limitParam || 250;
 
         let leads = await getAllRecords(db, "leads");
         leads = leads.filter(l => l.duplicate_status !== "MERGED");
@@ -180,7 +183,15 @@
           );
         }
 
-        if (crmStatus && crmStatus !== "ALL") {
+        if (cityFilter) {
+          leads = leads.filter(l => (l.city || "").toLowerCase().includes(cityFilter));
+        }
+
+        if (catFilter) {
+          leads = leads.filter(l => (l.category || "").toLowerCase().includes(catFilter));
+        }
+
+        if (crmStatus && crmStatus !== "ALL" && crmStatus !== "DUPLICATES") {
           leads = leads.filter(l => (l.crm_status || "").toUpperCase() === crmStatus.toUpperCase());
         }
 
